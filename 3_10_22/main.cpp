@@ -8,8 +8,12 @@
 
 using namespace std;
 
-int getInput(string);
+int getInput(string, bool (*func)(int, int, int), int x, int y);
 int fibNum(int, int, int, int[]);
+void moveDisks(int count, char source, char destination, char spare);
+bool intGreaterThan0(int, int, int);
+bool intInRange(int n, int lower, int upper);
+
 int main()
 {
 	int firstNum, secondNum;
@@ -18,10 +22,10 @@ int main()
 	int nthFib;
 	int * sequence;
 	
-	firstNum = getInput("Enter the first Fibonacci number: ");
-	secondNum = getInput("Enter the second Fibonacci number: ");
+	firstNum = getInput("Enter the first Fibonacci number: ", intInRange, 0, 10);
+	secondNum = getInput("Enter the second Fibonacci number: ", intInRange, 1, 10);
 	
-	nthFib = getInput("Enter the position of the desired Fibonacci number: ");
+	nthFib = getInput("Enter the position of the desired Fibonacci number: ", intGreaterThan0, 0 , 0);
 	
 	sequence = new int[nthFib];
 	sequence[0] = firstNum;
@@ -48,6 +52,9 @@ int main()
 	} */
 	
 	cout << "The " << nthFib << "th Fibonacci number is " << fibNum(firstNum, secondNum, nthFib, sequence) << endl;
+
+	//moveDisks(12, 'A', 'C', 'B');
+
 	/*ifstream in;
 	in.open("input.txt");
 	
@@ -99,17 +106,42 @@ int fibNum(int first, int second, int n, int seq[])
 	}
 }
 
-int getInput(string prompt)
+void moveDisks(int count, char source, char destination, char spare)
+{
+	if (count > 0)
+	{
+		moveDisks(count - 1, source, spare, destination);
+		cout << "Move disk " << count << " from " << source << " to " << destination << "." << endl;
+		moveDisks(count - 1, spare, destination, source);
+	}
+}
+
+int getInput(string prompt, bool (*func)(int, int, int), int x, int y)
 {
 	int searchItem;
 	cout << prompt;
 	cin >> searchItem;
 	cout << endl;
-	if(cin)
+	if(cin && func(searchItem, x, y))
 	{
 		return searchItem;
 	}
 	cin.clear();
 	cin.ignore(INT_MAX, '\n');
-	return getInput(prompt);
+	return getInput(prompt, func, x, y);
+}
+
+
+bool intGreaterThan0(int n, int, int)
+{
+	if(n < 0)
+		cout << "The number must be greater than 0." << endl;
+	return n > 0;
+}
+
+bool intInRange(int n, int lower, int upper)
+{
+	if(n < lower || n > upper)
+		cout << "The number should be between " << lower << " and " << upper << endl;
+	return n >= lower && n <= upper;
 }
