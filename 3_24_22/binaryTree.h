@@ -29,9 +29,9 @@ public:
 	int treeNodeCount() const;
 	int treeLeavesCount() const;
 	void destroyTree();
-	bool search(const Type& searchItem) const;
-	void insert(const Type& insertItem);
-	void deleteNode(const Type& deleteItem);
+	bool search(const Type& searchItem, int (*compare) (Type item1, Type item2)) const;
+	void insert(const Type& insertItem, int (*compare) (Type item1, Type item2));
+	void deleteNode(const Type& deleteItem, int (*compare) (Type item1, Type item2));
 	binarySearchTree(const binarySearchTree<Type>& otherTree);
 	binarySearchTree();
 	~binarySearchTree();
@@ -48,7 +48,7 @@ private:
 	void copyTree(binaryNode<Type> * &copiedTreeRoot, binaryNode<Type> * otherTreeRoot);
 	string printTree() const;
 	void destroy(binaryNode<Type> * &p);
-	bool search(const Type& searchItem, binaryNode<Type> *p) const;
+	bool search(const Type& searchItem, binaryNode<Type> *p, int (*compare) (Type item1, Type item2)) const;
 	void deleteFromTree(binaryNode<Type> * &p);
 };
 
@@ -70,7 +70,7 @@ void binarySearchTree<Type>::inorder(binaryNode<Type> *p) const
 	if(p != nullptr)
 	{
 		inorder(p->lLink);
-		cout << *p->info << " ";
+		cout << *p->info << endl;
 		inorder(p->rLink);
 	}
 }
@@ -149,7 +149,7 @@ void binarySearchTree<Type>::copyTree(binaryNode<Type> * &copiedTreeRoot, binary
 }
 
 template <class Type>
-void binarySearchTree<Type>::insert(const Type& insertItem)
+void binarySearchTree<Type>::insert(const Type& insertItem, int (*compare) (Type item1, Type item2))
 {
 	binaryNode<Type> *current;
 	binaryNode<Type> *trailCurrent = nullptr;
@@ -168,17 +168,17 @@ void binarySearchTree<Type>::insert(const Type& insertItem)
 		while(current != nullptr)
 		{
 			trailCurrent = current;
-			if(*current->info == insertItem)
+			if( (*compare)(*current->info, insertItem) == 0)
 			{
 				cout << "The item is already in the tree" << endl;
 				return;
 			}
-			else if (*current->info > insertItem)
+			else if ((*compare)(*current->info, insertItem) > 0)
 				current = current->lLink;
 			else 
 				current = current->rLink;
 		}
-		if(*trailCurrent->info > insertItem)
+		if((*compare)(*trailCurrent->info,insertItem) > 0)
 			trailCurrent->lLink = newNode;
 		else
 			trailCurrent->rLink = newNode;
@@ -242,24 +242,24 @@ const binarySearchTree<Type>& binarySearchTree<Type>::operator=(const binarySear
 }
 
 template <class Type>
-bool binarySearchTree<Type>::search(const Type& searchItem) const
+bool binarySearchTree<Type>::search(const Type& searchItem, int (*compare) (Type item1, Type item2)) const
 {
-	return search(searchItem, root);
+	return search(searchItem, root, compare);
 }
 
 template <class Type>
-bool binarySearchTree<Type>::search(const Type& searchItem, binaryNode<Type> * p) const
+bool binarySearchTree<Type>::search(const Type& searchItem, binaryNode<Type> * p, int (*compare) (Type item1, Type item2)) const
 {
 	if(p == nullptr)
 		return false;
 	else
 	{
-		if(*p->info == searchItem)
+		if((*compare)(*p->info, searchItem) == 0)
 			return true;
-		else if (searchItem < *p->info)
-			return search(searchItem, p->lLink);
+		else if ((*compare)(searchItem, *p->info) < 0)
+			return search(searchItem, p->lLink, compare);
 		else 
-			return search(searchItem, p->rLink);
+			return search(searchItem, p->rLink, compare);
 		
 	}
 }
@@ -314,7 +314,7 @@ void binarySearchTree<Type>::deleteFromTree(binaryNode<Type> * &p)
 }
 
 template <class Type>
-void binarySearchTree<Type>::deleteNode(const Type& deleteItem)
+void binarySearchTree<Type>::deleteNode(const Type& deleteItem, int (*compare) (Type item1, Type item2))
 {
 	binaryNode<Type> * current;
 	binaryNode<Type> * trailCurrent;
@@ -328,12 +328,12 @@ void binarySearchTree<Type>::deleteNode(const Type& deleteItem)
 		trailCurrent = root;
 		while(current != nullptr && !found)
 		{
-			if(*current->info == deleteItem)
+			if((*compare)(*current->info, deleteItem) == 0)
 				found = true;
 			else 
 			{
 				trailCurrent = current;
-				if(*current->info > deleteItem)
+				if((*compare)(*current->info, deleteItem) > 0)
 					current = current->lLink;
 				else
 					current = current->rLink;
@@ -345,7 +345,7 @@ void binarySearchTree<Type>::deleteNode(const Type& deleteItem)
 		{
 			if(current == root)
 				deleteFromTree(root);
-			else if(*trailCurrent->info > deleteItem)
+			else if((*compare)(*trailCurrent->info, deleteItem) > 0)
 				deleteFromTree(trailCurrent->lLink);
 			else 
 				deleteFromTree(trailCurrent->rLink);

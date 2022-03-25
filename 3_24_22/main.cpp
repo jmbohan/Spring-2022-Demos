@@ -1,10 +1,13 @@
 #include <iostream>
 #include "binaryTree.h"
+#include "book.h"
 
 using namespace std;
 
 int compareBookByTitle(book book1, book book2);
 int compareBookByAuthor(book book1, book book2);
+void toUppercase(string&);
+int compareInt(int x, int y);
 
 int main()
 {
@@ -14,20 +17,23 @@ int main()
 	{
 		int x;
 		cin >> x;
-		tree.insert(x);
+		tree.insert(x, compareInt);
 	}
 	
 	//cout << tree;
 	tree.inorderTraversal();
 	cout << endl;
 	cout << tree.treeHeight() << endl;
-	cout << tree.search(4238336) << endl;
-	cout << tree.search(115) << endl;
+	cout << tree.search(4238336, compareInt) << endl;
+	cout << tree.search(115, compareInt) << endl;
 	
 	cout << tree << endl;
-	tree.deleteNode(6930887);
+	tree.deleteNode(6930887, compareInt);
 	cout << tree << endl;
-	/*
+	
+	string author, title, publisher, subject, callnum, isbn;
+	char c = 'Y';
+	int numBooks = 1;
 	binarySearchTree<book> bookTitleTree;
 	binarySearchTree<book> bookAuthorTree;
 	while(c == 'Y')
@@ -101,8 +107,8 @@ int main()
 			
 		}
 		
-		bookTitleTree.insert(b);
-		bookAuthorTree.insert(b);
+		bookTitleTree.insert(*b, compareBookByTitle);
+		bookAuthorTree.insert(*b, compareBookByAuthor);
 		//books.insertLast(book(author, title, subject, publisher, callnum, isbn));
 		
 		cout << endl <<  *b << endl;
@@ -114,7 +120,12 @@ int main()
 		
 		
 	}
- */
+	cout << "Books by Author: " << endl;
+	bookAuthorTree.inorderTraversal();
+	
+	cout << endl << "Books by Title: " << endl;
+	bookTitleTree.inorderTraversal();
+	
 	return 0;
 }
 
@@ -133,6 +144,24 @@ int compareBookByAuthor(book book1, book book2)
 	if(book1.getAuthor() > book2.getAuthor())
 		return 1;
 	else if(book1.getAuthor() < book2.getAuthor())
+		return -1;
+	else 
+		return 0;
+}
+
+void toUppercase(string& str)
+{
+	for (int i = 0; i < str.length(); i++)
+	{
+		str[i] = toupper(str[i]);
+	}
+}
+
+int compareInt(int x, int y)
+{
+	if(x > y)
+		return 1;
+	else if(x < y)
 		return -1;
 	else 
 		return 0;
